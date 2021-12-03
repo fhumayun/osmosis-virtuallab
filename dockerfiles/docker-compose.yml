@@ -1,0 +1,42 @@
+networks:
+  A-parent-net-86ea96f6: {}
+  A_NET: {}
+  D-parent-net-06ab12a0: {}
+services:
+  A:
+    hostname: A
+    image: cloud_manager_local/centos8-x64:latest
+    networks:
+    - A-parent-net-86ea96f6
+    - A_NET
+  B:
+    hostname: B
+    image: osmosis_local/centos8-x64:latest
+    networks:
+    - A-parent-net-86ea96f6
+  C:
+    hostname: C
+    image: osmosis_local/centos8-x64:latest
+    networks:
+    - A-parent-net-86ea96f6
+  D:
+    environment:
+    - NODE_ID=AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA
+    hostname: D
+    image: cloud_manager_local/centos8-x64:latest
+    networks:
+    - D-parent-net-06ab12a0
+    - A_NET
+    ports:
+    - 8522:8522
+  E:
+    hostname: E
+    image: osmosis_local/centos8-x64:latest
+    networks:
+    - D-parent-net-06ab12a0
+  F:
+    hostname: F
+    image: osmosis_local/centos8-x64:latest
+    networks:
+    - D-parent-net-06ab12a0
+version: '3.9'
