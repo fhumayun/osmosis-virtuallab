@@ -3,7 +3,7 @@
 import argparse
 from lib import helpers
 import os
-import sys
+
 parser = argparse.ArgumentParser(description="""Build docker images for running
                                 osmosis and cloud and updating the
                                 docker-compose file to work with them. It is
@@ -40,5 +40,10 @@ image_tag_osmosis = "osmosis" + f":{osmosis.version}"
 image_tag_cloud = "cloud" + f":cloud_{cloud.version}_manager_{manager.version}"
 
 # Build images
+# TODO: check if the images exist before building them
 os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.odevapp ." % (image_tag_osmosis, os.getcwd()))
 os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.cloud ." % (image_tag_cloud, os.getcwd()))
+
+os.system("updateDockerCompose")
+
+helpers.updateDockerCompose(image_tag_cloud, image_tag_osmosis)

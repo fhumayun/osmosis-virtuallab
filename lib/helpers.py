@@ -4,6 +4,8 @@ import subprocess as sp
 import sys
 import os
 import glob
+import yaml
+
 from lib import constants
 
 
@@ -46,6 +48,7 @@ def getFileName(product: product):
     return build_path, build_version
 
 
+# TODO: Don't download the files if they are already there.
 def getFile(product: product):
     # Remove previous files if exist
     if glob.glob(f"appfiles/{product.name}*.tar.gz"):
@@ -71,3 +74,14 @@ def buildCloudTar(cloud: product, manager: product):
     os.system("cp appfiles/star_local*.jks appfiles/cloud/star_local.jks")
     os.system("tar -czf appfiles/cloud-manager.tar.gz -C appfiles/cloud .")
     os.system("rm -rf appfiles/cloud")
+
+
+def updateDockerCompose(cloud_image, osmosis_image):
+    compose_file = yaml.safe_load(open("dockerfiles/docker-compose.yml", "r"))
+    for k, v in compose_file["services"].items():
+        if v["hostname"] == "A":
+            v["image"] = cloud_image
+        else:
+            v["image"] = osmosis_image
+    # to write the docker-compose
+    yaml.safe_dump(compose_file, open("dockerfiles/docker-compose.yml", "w+"))
