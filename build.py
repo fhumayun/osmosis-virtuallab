@@ -3,7 +3,7 @@
 import argparse
 from lib import helpers
 import os
-
+import sys
 parser = argparse.ArgumentParser(description="""Build docker images for running
                                 osmosis and cloud and updating the
                                 docker-compose file to work with them. It is
@@ -42,7 +42,3 @@ image_tag_cloud = "cloud" + f":cloud_{cloud.version}_manager_{manager.version}"
 # Build images
 os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.odevapp ." % (image_tag_osmosis, os.getcwd()))
 os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.cloud ." % (image_tag_cloud, os.getcwd()))
-
-
-os.system("docker run --name centosodevapp1 -h odevappcentos1 -d -e NODE_ID='11111111-aaaa-3333-4444-555555555555' %s" % image_tag_osmosis)
-os.system("docker run --name centosodevapp2 -h odevappcentos2 -d -e NODE_ID='aaaaaaaa-1111-cccc-dddd-eeeeeeeeeeee -p 8522:8522' %s" % image_tag_cloud)

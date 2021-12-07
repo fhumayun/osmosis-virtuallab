@@ -69,5 +69,5 @@ def buildCloudTar(cloud: product, manager: product):
     os.system(f"tar -xvf appfiles/{cloud.name}{cloud.version}.tar.gz -C appfiles/cloud/")
     os.system("cp appfiles/license.json appfiles/cloud/cloud/config/")
     os.system("cp appfiles/star_local*.jks appfiles/cloud/star_local.jks")
-    os.system("tar -czf appfiles/osmosis-cloud.tar.gz appfiles/cloud")
+    os.system("tar -czf appfiles/cloud-manager.tar.gz -C appfiles/cloud .")
     os.system("rm -rf appfiles/cloud")

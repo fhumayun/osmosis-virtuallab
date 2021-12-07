@@ -5,7 +5,7 @@ RUN yum install -y java-1.8.0-openjdk ncurses jq iperf3
 
 ENV JAVA_HOME=/etc/alternatives/jre
 ENV TERM=xterm
-COPY appfiles/osmosis-cloud*.tar.gz /tmp/osmosis.tar.gz
+COPY appfiles/cloud-manager*.tar.gz /tmp/osmosis.tar.gz
 RUN mkdir app
 RUN tar xf /tmp/osmosis.tar.gz --directory=/app
 RUN rm /tmp/osmosis.tar.gz
