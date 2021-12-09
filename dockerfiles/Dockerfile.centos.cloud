@@ -1,0 +1,17 @@
+FROM centos:8.3.2011
+
+RUN yum -y update
+RUN yum install -y java-1.8.0-openjdk ncurses jq iperf3
+
+ENV JAVA_HOME=/etc/alternatives/jre
+ENV TERM=xterm
+COPY appfiles/cloud-manager*.tar.gz /tmp/osmosis.tar.gz
+RUN mkdir app
+RUN tar xf /tmp/osmosis.tar.gz --directory=/app
+RUN rm /tmp/osmosis.tar.gz
+COPY appfiles/license.json /app/cloud/config/license.json
+
+COPY appfiles/docker-entrypoint.sh /usr/local/bin/
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]

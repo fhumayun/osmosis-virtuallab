@@ -1,0 +1,6 @@
+__pycache__
+.vscode
+*.tar.gz
+*.jks
+*.json
+dockerfiles/test-scripts/*.txt

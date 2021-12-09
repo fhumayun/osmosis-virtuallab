@@ -1,0 +1,40 @@
+services:
+  A:
+    container_name: container-A
+    hostname: A
+    image: cloud:cloud_0.16.0_manager_0.16.0
+    ports:
+    - 8522:8522
+  B:
+    container_name: container-B
+    hostname: B
+    image: osmosis:0.16.0
+  C:
+    container_name: container-C
+    hostname: C
+    image: osmosis:0.16.0
+  D:
+    container_name: container-D
+    hostname: D
+    image: osmosis:0.16.0
+  E:
+    container_name: container-E
+    hostname: E
+    image: osmosis:0.16.0
+  root:
+    container_name: container-root
+    depends_on:
+    - A
+    - B
+    - C
+    - D
+    - E
+    environment:
+    - NODES=A;B;C;D;E
+    hostname: root
+    image: main/container:latest
+    stdin_open: true
+    tty: true
+    volumes:
+    - ./test-scripts:/app
+version: '3.9'

@@ -1,0 +1,17 @@
+FROM centos:8.3.2011
+
+RUN yum -y update
+RUN yum install -y java-1.8.0-openjdk ncurses jq iperf3
+
+ENV JAVA_HOME=/etc/alternatives/jre
+ENV TERM=xterm
+COPY appfiles/osmosis*.tar.gz /tmp/osmosis.tar.gz
+RUN mkdir app
+RUN tar xf /tmp/osmosis.tar.gz --directory=/app
+RUN rm /tmp/osmosis.tar.gz
+COPY appfiles/license.json /app/osmosis/config/license.json
+
+COPY appfiles/doe_odevapp.sh /usr/local/bin/
+RUN chmod 755 /usr/local/bin/doe_odevapp.sh
+
+ENTRYPOINT [ "/usr/local/bin/doe_odevapp.sh" ]
