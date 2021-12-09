@@ -5,12 +5,11 @@ import sys
 import os
 import glob
 import yaml
-
 from lib import constants
 
 
 class product:
-    """This class represents a wti product"""
+    """Represents a wti product/application"""
     file_name = ""
 
     def __init__(self, name: str, version: str):
@@ -18,7 +17,12 @@ class product:
         self.version = version
 
 
-def getFileName(product: product):
+def getFileName(product: product) -> tuple[str, str]:
+    """
+    Verify that the product version exists.
+
+    Return the file name and version.
+    """
     if product.version is not None:
         version = "-" + product.version
     else:
@@ -39,48 +43,61 @@ def getFileName(product: product):
 
     build_path = sorted(build_path)[-1]
 
-    # get the version
+    # get the application version number
     build_path = build_path.split(" ")[-1]
     build_version = sp.getoutput("echo %s | cut -d '-' -f 4" % build_path)
 
     if "tar" in build_version:
         build_version = ".".join(build_version.split(".")[:3])
+
     return build_path, build_version
 
 
 # TODO: Don't download the files if they are already there.
-def getFile(product: product):
-    # Remove previous files if exist
-    if glob.glob(f"appfiles/{product.name}*.tar.gz"):
-        os.system(f"rm appfiles/{product.name}*.tar.gz")
+def getFile(product: product) -> None:
+    """
+    Download the product file if not exist
+    """
+    if not os.path.isfile(f"appfiles/{product.name}{product.version}.tar.gz"):
+        # Remove previous files if exists
+        if glob.glob(f"appfiles/{product.name}*.tar.gz"):
+            os.system(f"rm appfiles/{product.name}*.tar.gz")
 
-    if product.name == "cloud" or product.name == "osmosis":
-        folder = "build"
-    else:
-        folder = product.name
+        if product.name == "cloud" or product.name == "osmosis":
+            folder = "build"
+        else:
+            folder = product.name
 
-    tar_file = f"{product.name}{product.version}.tar.gz"
+        tar_file = f"{product.name}{product.version}.tar.gz"
 
-    os.system(f"aws s3 cp s3://{constants.S3_BUCKET}/{folder}/dev/{product.file_name} ./{tar_file}")
-
-    os.system(f"mv {tar_file} appfiles/")
-
-
-def buildCloudTar(cloud: product, manager: product):
-    os.system("mkdir -p appfiles/cloud/manager")
-    os.system(f"tar -xvf appfiles/{manager.name}{manager.version}.tar.gz -C appfiles/cloud/manager")
-    os.system(f"tar -xvf appfiles/{cloud.name}{cloud.version}.tar.gz -C appfiles/cloud/")
-    os.system("cp appfiles/license.json appfiles/cloud/cloud/config/")
-    os.system("cp appfiles/star_local*.jks appfiles/cloud/star_local.jks")
-    os.system("tar -czf appfiles/cloud-manager.tar.gz -C appfiles/cloud .")
-    os.system("rm -rf appfiles/cloud")
+        os.system(f"aws s3 cp s3://{constants.S3_BUCKET}/{folder}/dev/{product.file_name} ./{tar_file}")
+        os.system(f"mv {tar_file} appfiles/")
 
 
-def updateDockerCompose(cloud_image, osmosis_image):
+def buildCloudTar(cloud: product, manager: product) -> None:
+    """
+    Build the tar file with manager and cloud
+    """
+    if not os.path.isfile(f"appfiles/cloud-manager-{cloud.version}-{manager.version}.tar.gz"):
+        os.system("mkdir -p appfiles/cloud/manager")
+        os.system(f"tar -xf appfiles/{manager.name}{manager.version}.tar.gz -C appfiles/cloud/manager")
+        os.system(f"tar -xf appfiles/{cloud.name}{cloud.version}.tar.gz -C appfiles/cloud/")
+        os.system("cp appfiles/license.json appfiles/cloud/cloud/config/")
+        os.system("cp appfiles/star_local*.jks appfiles/cloud/star_local.jks")
+        os.system(f"tar -czf appfiles/cloud-manager-{cloud.version}-{manager.version}.tar.gz -C appfiles/cloud .")
+        os.system("rm -rf appfiles/cloud")
+
+
+def updateDockerCompose(cloud_image, osmosis_image, main_image) -> None:
+    """
+    Update the docker-compose file with the new images
+    """
     compose_file = yaml.safe_load(open("dockerfiles/docker-compose.yml", "r"))
     for k, v in compose_file["services"].items():
         if v["hostname"] == "A":
             v["image"] = cloud_image
+        elif v["hostname"] == "root":
+            v["image"] = main_image
         else:
             v["image"] = osmosis_image
     # to write the docker-compose

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   A:
     container_name: container-A
@@ -24,6 +22,7 @@ services:
     hostname: E
     image: osmosis:0.16.0
   root:
+    container_name: container-root
     depends_on:
     - A
     - B
@@ -33,8 +32,9 @@ services:
     environment:
     - NODES=A;B;C;D;E
     hostname: root
-    image: python:3.9.4-alpine3.13
+    image: main/container:latest
     stdin_open: true
     tty: true
     volumes:
     - ./test-scripts:/app
+version: '3.9'
