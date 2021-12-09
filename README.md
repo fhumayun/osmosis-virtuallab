@@ -34,7 +34,7 @@ Includes the dockerfiles to build the images that will be used on the docker-com
 
 Python files with methods and constants are required on different scripts.
 
-### scripts
+### scripts
 
 Store scripts for quick actions on the virtual lab. It includes the following files:
 - `executetest.py`
