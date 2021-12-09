@@ -4,9 +4,9 @@ import argparse
 import os
 import sys
 import docker
+import logging
 from lib import helpers
 
-# TODO: Work on options to install dependencies
 parser = argparse.ArgumentParser(description="""Build docker images for running
                                 osmosis and cloud and updating the
                                 docker-compose file to work with them. It is
@@ -20,6 +20,8 @@ parser.add_argument("-c", "--cloud", action="store", dest="cloud_version",
 parser.add_argument("-m", "--manager", action="store", dest="manager_version",
                     help="Manager version")
 
+# TODO: Set logging configuration on a separate file
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 # Parse incoming parameters
 args = parser.parse_args()
 
@@ -33,7 +35,7 @@ products = [osmosis, cloud, manager]
 try:
     client = docker.from_env()
 except docker.errors.DockerException:
-    print("Docker Engine not running, please open the docker application and run the script again")
+    logging.error("Docker Engine not running, please open the docker application and run the script again")
     sys.exit()
 
 # Verify that versions exist and get aws path
@@ -52,14 +54,23 @@ image_tag_osmosis = "osmosis" + f":{osmosis.version}"
 image_tag_cloud = "cloud" + f":cloud_{cloud.version}_manager_{manager.version}"
 image_tag_main = "main/container:latest"
 
-# TODO: Change to docker package
+# TODO: Change to docker package
+logging.info("Building docker images")
+
 if len(client.images.list(image_tag_osmosis)) == 0:
     os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.odevapp ." % (image_tag_osmosis, os.getcwd()))
+else:
+    logging.info(f"{image_tag_osmosis} image already exist")
 
 if len(client.images.list(image_tag_cloud)) == 0:
     os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.centos.cloud ." % (image_tag_cloud, os.getcwd()))
+else:
+    logging.info(f"{image_tag_cloud} image already exist")
 
 if len(client.images.list(image_tag_main)) == 0:
     os.system("docker build --tag %s -f %s/dockerfiles/Dockerfile.main ." % (image_tag_main, os.getcwd()))
+else:
+    logging.info(f"{image_tag_main} image already exist")
 
+logging.info("Updating docker-compose file")
 helpers.updateDockerCompose(image_tag_cloud, image_tag_osmosis, image_tag_main)

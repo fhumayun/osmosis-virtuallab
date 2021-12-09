@@ -5,6 +5,7 @@ import sys
 import os
 import glob
 import yaml
+import logging
 from lib import constants
 
 
@@ -24,8 +25,10 @@ def getFileName(product: product) -> tuple[str, str]:
     Return the file name and version.
     """
     if product.version is not None:
+        logging.info(f"Checking if {product.version} exist for {product.name}")
         version = "-" + product.version
     else:
+        logging.info(f"No version provided for {product.name}, getting last one")
         version = ""
 
     if product.name == "cloud" or product.name == "osmosis":
@@ -38,7 +41,7 @@ def getFileName(product: product) -> tuple[str, str]:
                   and f"{product.name}" in x and f"{version}" in x]
 
     if len(build_path) == 0:
-        print(f"{product.name} {version[1:]} version doesn´t exist")
+        logging.error(f"{product.name} {version[1:]} version doesn´t exist")
         sys.exit()
 
     build_path = sorted(build_path)[-1]
@@ -53,12 +56,13 @@ def getFileName(product: product) -> tuple[str, str]:
     return build_path, build_version
 
 
-# TODO: Don't download the files if they are already there.
 def getFile(product: product) -> None:
     """
     Download the product file if not exist
     """
+
     if not os.path.isfile(f"appfiles/{product.name}{product.version}.tar.gz"):
+        logging.info(f"Downloading files for {product.name}-{product.version}")
         # Remove previous files if exists
         if glob.glob(f"appfiles/{product.name}*.tar.gz"):
             os.system(f"rm appfiles/{product.name}*.tar.gz")
@@ -72,6 +76,8 @@ def getFile(product: product) -> None:
 
         os.system(f"aws s3 cp s3://{constants.S3_BUCKET}/{folder}/dev/{product.file_name} ./{tar_file}")
         os.system(f"mv {tar_file} appfiles/")
+    else:
+        logging.info(f"{product.name}{product.version}.tar.gz file already exist on local")
 
 
 def buildCloudTar(cloud: product, manager: product) -> None:
@@ -79,6 +85,7 @@ def buildCloudTar(cloud: product, manager: product) -> None:
     Build the tar file with manager and cloud
     """
     if not os.path.isfile(f"appfiles/cloud-manager-{cloud.version}-{manager.version}.tar.gz"):
+        logging.info(f"Building cloud-manager-{cloud.version}-{manager.version} tar file")
         os.system("mkdir -p appfiles/cloud/manager")
         os.system(f"tar -xf appfiles/{manager.name}{manager.version}.tar.gz -C appfiles/cloud/manager")
         os.system(f"tar -xf appfiles/{cloud.name}{cloud.version}.tar.gz -C appfiles/cloud/")
@@ -86,12 +93,15 @@ def buildCloudTar(cloud: product, manager: product) -> None:
         os.system("cp appfiles/star_local*.jks appfiles/cloud/star_local.jks")
         os.system(f"tar -czf appfiles/cloud-manager-{cloud.version}-{manager.version}.tar.gz -C appfiles/cloud .")
         os.system("rm -rf appfiles/cloud")
+    else:
+        logging.info(f"cloud-manager-{cloud.version}-{manager.version} tar file already exist")
 
 
 def updateDockerCompose(cloud_image, osmosis_image, main_image) -> None:
     """
     Update the docker-compose file with the new images
     """
+    logging.info("Updating docker-compose file with new images")
     compose_file = yaml.safe_load(open("dockerfiles/docker-compose.yml", "r"))
     for k, v in compose_file["services"].items():
         if v["hostname"] == "A":
