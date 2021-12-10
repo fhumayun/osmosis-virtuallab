@@ -15,8 +15,8 @@ Additional to this, is required to place the license.json and Java KeyStore file
 Run the `build.py` to create the docker images with the osmosis, cloud and manager builds from S3. Then run `start.py` to start the virtual lab and `stop.py` to stop it.
 
 In the scripts folder:
-- `stopcontainer.py` stop the desired container.
-- `startcontainer.py` start the container again.
+- `stopnode.py` stop the desired node.
+- `startnode.py` start the node again.
 - `executetest.py` open a shell inside the root container where you can execute the tests located on `dockerfiles/test-scripts`.
 
 ## Folders
@@ -38,5 +38,5 @@ Python files with methods and constants are required on different scripts.
 
 Store scripts for quick actions on the virtual lab. It includes the following files:
 - `executetest.py`
-- `startcontainer.py`
-- `stopcontainer.py`
+- `startnode.py`
+- `stopnode.py`
