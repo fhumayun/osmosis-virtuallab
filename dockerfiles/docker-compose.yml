@@ -4,7 +4,7 @@ services:
     hostname: A
     image: cloud:cloud_0.16.0_manager_0.16.0
     ports:
-    - 8522:8522
+    - 8082:8522
   B:
     container_name: container-B
     hostname: B
