@@ -1,5 +1,8 @@
 FROM centos:8.3.2011
 
+# Fixing URL from repos
+RUN sed -i 's,#baseurl=http://mirror\.centos\.org,baseurl=http://vault.centos.org,' /etc/yum.repos.d/*.repo
+
 RUN yum -y update
 RUN yum install -y java-1.8.0-openjdk ncurses jq iperf3
 
